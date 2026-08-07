@@ -1,66 +1,458 @@
-# nodejs-getting-started
+# Node.js CI/CD Deployment with Docker and AWS EC2
 
-A barebones Node.js app using [Express](https://expressjs.com/).
+## Project Overview
 
-This application supports the tutorials for both the [Cedar and Fir generations](https://devcenter.heroku.com/articles/generations) of the Heroku platform. You can check them out here:
+This project demonstrates an end-to-end CI/CD pipeline for deploying a Node.js application using modern DevOps practices.
 
-* [Getting Started on Heroku with Node.js](https://devcenter.heroku.com/articles/getting-started-with-nodejs)
-* [Getting Started on Heroku Fir with Node.js](https://devcenter.heroku.com/articles/getting-started-with-nodejs-fir)
+The main focus of this project is not application development but implementing a complete deployment workflow:
 
-## Running Locally
+- Containerizing a Node.js application using Docker
+- Creating an automated CI/CD pipeline using GitHub Actions
+- Building and pushing Docker images to Docker Hub
+- Automatically deploying the application to an AWS EC2 instance
 
-Make sure you have [Node.js](http://nodejs.org/) and the [Heroku CLI](https://cli.heroku.com/) installed.
 
-```sh
-$ git clone https://github.com/heroku/nodejs-getting-started.git # or clone your own fork
-$ cd nodejs-getting-started
-$ npm install
-$ npm start
+---
+
+# Application Source Code Acknowledgement
+
+The Node.js application used in this project is based on the open-source project:
+
+**Heroku Node.js Getting Started**
+
+Original repository:
+
+https://github.com/heroku/nodejs-getting-started
+
+
+Special thanks to the Heroku team for providing this simple and well-structured Node.js example application, which allowed me to focus on learning and implementing DevOps practices.
+
+My contribution to this project focuses on:
+
+- Docker containerization
+- CI/CD automation
+- AWS EC2 deployment
+- Infrastructure and deployment documentation
+
+
+---
+
+# Architecture
+
+The following diagram shows the complete CI/CD workflow from source code changes to live application deployment.
+
+![CI/CD Architecture](screenshots/architecture.png)
+
+
+---
+
+# Tech Stack
+
+## Application
+
+- Node.js
+- Express.js
+
+
+## DevOps Tools
+
+- Git
+- GitHub
+- GitHub Actions
+- Docker
+- Docker Hub
+
+
+## Cloud Infrastructure
+
+- AWS EC2
+- Ubuntu Linux
+- AWS Security Groups
+
+
+---
+
+# Project Structure
+
+```
+devops-nodejs-demo/
+
+├── .github/
+│   └── workflows/
+│       └── deploy.yml
+│
+├── public/
+├── views/
+│
+├── screenshots/
+│   ├── architecture.png
+│   ├── github-repository.png
+│   ├── github-actions-success.png
+│   ├── dockerhub-image.png
+│   ├── ec2-container-running.png
+│   └── live-application.png
+│
+├── Dockerfile
+├── .dockerignore
+├── package.json
+├── package-lock.json
+├── index.js
+├── README.md
+└── test.js
 ```
 
-Your app should now be running on [localhost:5006](http://localhost:5006/).
 
-## Deploying to Heroku
+---
 
-Using resources for this example app counts towards your usage. [Delete your app](https://devcenter.heroku.com/articles/heroku-cli-commands#heroku-apps-destroy) and [database](https://devcenter.heroku.com/articles/heroku-postgresql#removing-the-add-on) as soon as you are done experimenting to control costs.
+# Running Application Locally
 
-### Deploy on [Cedar][cedar]
+## Clone Repository
 
-By default, apps use Eco dynos on [Cedar][cedar] if you are subscribed to Eco. Otherwise, it defaults to Basic dynos. The 
-Eco dynos plan is shared across all Eco dynos in your account and is recommended if you plan on deploying many small apps 
-to Heroku. Learn more about our low-cost plans [here](https://blog.heroku.com/new-low-cost-plans).
+```bash
+git clone https://github.com/naziksalihu/devops-nodejs-demo.git
 
-Eligible students can apply for platform credits through our new [Heroku for GitHub Students program](https://blog.heroku.com/github-student-developer-program).
-
-```
-$ heroku create
-$ git push heroku main
-$ heroku open
+cd devops-nodejs-demo
 ```
 
-### Deploy on [Fir][fir]
 
-By default, apps on [Fir][fir] use 1X-Classic dynos. To create an app on [Fir][fir] you'll need to 
-[create a private space](https://devcenter.heroku.com/articles/working-with-private-spaces#create-a-private-space)
-first.
+## Install Dependencies
 
-```
-$ heroku spaces:create <space-name> --team <team-name> --generation fir
-$ heroku create --space <space-name>
-$ git push heroku main
-$ heroku open
+```bash
+npm install
 ```
 
-## Documentation
 
-For more information about using Node.js on Heroku, see these Dev Center articles:
+## Start Application
 
-- [Getting Started on Heroku with Node.js](https://devcenter.heroku.com/articles/getting-started-with-nodejs)
-- [Getting Started on Heroku Fir with Node.js](https://devcenter.heroku.com/articles/getting-started-with-nodejs-fir)
-- [Heroku Node.js Support](https://devcenter.heroku.com/articles/nodejs-support)
-- [Node.js on Heroku](https://devcenter.heroku.com/categories/nodejs)
-- [Best Practices for Node.js Development](https://devcenter.heroku.com/articles/node-best-practices)
-- [Using WebSockets on Heroku with Node.js](https://devcenter.heroku.com/articles/node-websockets)
+```bash
+npm start
+```
 
-[cedar]: https://devcenter.heroku.com/articles/generations#cedar
-[fir]: https://devcenter.heroku.com/articles/generations#fir
+
+Application will run on:
+
+```
+http://localhost:5006
+```
+
+
+---
+
+# Docker Implementation
+
+The application was containerized using Docker to create a portable deployment package.
+
+## Docker Image Build
+
+```bash
+docker build -t naziksalihu/devops-nodejs-demo:latest .
+```
+
+
+## Run Docker Container Locally
+
+```bash
+docker run -d \
+-p 80:5006 \
+--name devops-nodejs-demo \
+naziksalihu/devops-nodejs-demo:latest
+```
+
+
+Application will be available at:
+
+```
+http://localhost
+```
+
+
+---
+
+# CI/CD Pipeline
+
+The CI/CD pipeline is automatically triggered whenever code is pushed to the `main` branch.
+
+Workflow:
+
+```
+Developer
+    |
+    | git push
+    ↓
+GitHub Repository
+    |
+    ↓
+GitHub Actions
+    |
+    ├── Checkout Code
+    |
+    ├── Build Docker Image
+    |
+    ├── Push Image to Docker Hub
+    |
+    └── Deploy to AWS EC2
+            |
+            ↓
+       Live Application
+```
+
+
+## Pipeline Steps
+
+### 1. Checkout Source Code
+
+GitHub Actions downloads the latest source code from the repository.
+
+
+### 2. Docker Authentication
+
+The workflow authenticates with Docker Hub using GitHub repository secrets.
+
+
+### 3. Docker Image Build
+
+A Docker image is created:
+
+```
+naziksalihu/devops-nodejs-demo:latest
+```
+
+
+### 4. Push Image to Docker Hub
+
+The newly created image is pushed to Docker Hub.
+
+
+### 5. Deploy to AWS EC2
+
+GitHub Actions connects to the EC2 instance and:
+
+- Pulls the latest Docker image
+- Stops the previous container
+- Removes the old container
+- Starts a new container with the latest image
+
+
+---
+
+# GitHub Actions Workflow
+
+Workflow file:
+
+```
+.github/workflows/deploy.yml
+```
+
+
+Deployment trigger:
+
+```yaml
+on:
+  push:
+    branches:
+      - main
+```
+
+
+Every push to the main branch automatically starts the deployment process.
+
+
+---
+
+# AWS EC2 Deployment
+
+## EC2 Environment
+
+Server:
+
+```
+AWS EC2 Ubuntu Instance
+```
+
+
+The EC2 instance runs the Docker container hosting the Node.js application.
+
+
+## Security Group Configuration
+
+Required inbound rules:
+
+| Type | Port | Source |
+|---|---|---|
+| SSH | 22 | My IP |
+| HTTP | 80 | 0.0.0.0/0 |
+
+
+## Container Deployment
+
+Container:
+
+```
+devops-nodejs-demo
+```
+
+
+Port mapping:
+
+```
+EC2 Port 80
+      |
+      ↓
+Docker Container Port 5006
+      |
+      ↓
+Node.js Application
+```
+
+
+---
+
+# Troubleshooting
+
+## Issue 1: Dockerfile Not Found in GitHub Actions
+
+### Error
+
+```
+failed to read dockerfile:
+open Dockerfile: no such file or directory
+```
+
+
+### Cause
+
+The Dockerfile was ignored by `.gitignore` and was not pushed to GitHub.
+
+
+### Solution
+
+Removed Dockerfile from `.gitignore`, added it to Git tracking, and pushed it to GitHub.
+
+
+---
+
+## Issue 2: Application Not Accessible Through Browser
+
+### Error
+
+```
+ERR_TIMED_OUT
+```
+
+
+### Cause
+
+AWS Security Group did not allow HTTP traffic.
+
+
+### Solution
+
+Added HTTP inbound rule:
+
+```
+Type: HTTP
+Port: 80
+Source: 0.0.0.0/0
+```
+
+
+---
+
+## Issue 3: Docker Image Updates
+
+Docker image tags point to image versions.
+
+Example:
+
+```
+naziksalihu/devops-nodejs-demo:latest
+```
+
+When a new image is pushed, the `latest` tag points to the newest image.
+
+
+---
+
+# Screenshots
+
+## CI/CD Architecture
+
+![CI/CD Architecture](screenshots/architecture.png)
+## Architecture
+
+```mermaid
+flowchart TD
+
+A[Developer] -->|git push| B[GitHub Repository]
+
+B --> C[GitHub Actions]
+
+C --> D[Docker Build]
+
+D --> E[Docker Hub]
+
+E -->|docker pull| F[AWS EC2 Ubuntu]
+
+F --> G[Docker Container]
+
+G --> H[Node.js Express Application]
+
+H --> I[Users]
+
+
+---
+
+## GitHub Repository Structure
+
+![GitHub Repository](screenshots/github-repository.png)
+
+
+---
+
+## GitHub Actions Successful Deployment
+
+![GitHub Actions](screenshots/github-actions-success.png)
+
+
+---
+
+## Docker Hub Image
+
+![Docker Hub Image](screenshots/dockerhub-image.png)
+
+
+---
+
+## AWS EC2 Running Container
+
+![EC2 Container](screenshots/ec2-container-running.png)
+
+
+---
+
+## Live Application
+
+![Live Application](screenshots/live-application.png)
+
+
+---
+
+# Future Improvements
+
+Possible improvements for this project:
+
+- Use versioned Docker image tags instead of only `latest`
+- Add Nginx as a reverse proxy
+- Add HTTPS using SSL certificates
+- Implement zero-downtime deployment
+- Use AWS Load Balancer
+- Deploy using Kubernetes
+
+
+---
+
+# Author
+
+**Nazik Ahamed Mohamed Salihu**
+
+DevOps Practice Project
