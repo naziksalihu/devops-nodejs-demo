@@ -378,27 +378,6 @@ When a new image is pushed, the `latest` tag points to the newest image.
 ## CI/CD Architecture
 
 ![CI/CD Architecture](screenshots/architecture.png)
-## Architecture
-
-```mermaid
-flowchart TD
-
-A[Developer] -->|git push| B[GitHub Repository]
-
-B --> C[GitHub Actions]
-
-C --> D[Docker Build]
-
-D --> E[Docker Hub]
-
-E -->|docker pull| F[AWS EC2 Ubuntu]
-
-F --> G[Docker Container]
-
-G --> H[Node.js Express Application]
-
-H --> I[Users]
-
 
 ---
 
